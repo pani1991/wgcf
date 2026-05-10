@@ -1,0 +1,25 @@
+name: Docker Build wgcf
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build wgcf using Docker
+        run: |
+          docker run --rm -v "$PWD":/app -w /app golang:1.23-alpine sh -c "
+            apk add git &&
+            go mod download &&
+            CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o wgcf.exe ./cmd/wgcf
+          "
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wgcf-windows-amd64
+          path: wgcf.exe
